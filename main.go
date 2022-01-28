@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/elwandyTD/blanja-golang-api/app"
@@ -12,11 +11,18 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/julienschmidt/httprouter"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	addr := "localhost:3000"
+
 	db := app.NewDB()
 	validate := validator.New()
+
+	helpers.ViperInitConfigLogging()
+
+	logrus.WithField("addr", addr).Info("Host name")
 
 	categoryRepositories := repositories.NewCategoryRepository()
 	categoryServices := services.NewCategoryService(categoryRepositories, db, validate)
@@ -27,14 +33,10 @@ func main() {
 	router.GET("/api/v1/categories/:categoryId", categoryController.FindById)
 
 	server := http.Server{
-		Addr:    "localhost:3000",
+		Addr:    addr,
 		Handler: router,
 	}
 
 	err := server.ListenAndServe()
 	helpers.PanicIfError(err)
-
-	log.Print("Ready")
-	log.Printf("Ready")
-	log.Println("Ready")
 }
